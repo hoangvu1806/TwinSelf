@@ -1,0 +1,137 @@
+name: Memory Pipeline CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'semantic_data/**'
+      - 'episodic_data/**'
+      - 'procedural_data/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'semantic_data/**'
+      - 'episodic_data/**'
+      - 'procedural_data/**'
+  workflow_dispatch:
+    inputs:
+      force_rebuild:
+        description: 'Force rebuild all memories'
+        required: false
+        default: 'false'
+
+jobs:
+  validate-data:
+    name: Validate Data Files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install jsonschema pyyaml
+      
+      - name: Validate JSON files
+        run: |
+          python scripts/validate_data.py --check-json
+      
+      - name: Validate Markdown files
+        run: |
+          python scripts/validate_data.py --check-markdown
+      
+      - name: Check data quality
+        run: |
+          python scripts/validate_data.py --quality-check
+
+  build-memories:
+    name: Build Memory Collections
+    needs: validate-data
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Cache pip packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+      
+      - name: Cache models
+        uses: actions/cache@v3
+        with:
+          path: ./models
+          key: ${{ runner.os }}-models-${{ hashFiles('twinself/core/config.py') }}
+      
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      
+      - name: Smart rebuild memories
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          USER_PREFIX: ${{ secrets.USER_PREFIX }}
+        run: |
+          if [ "${{ github.event.inputs.force_rebuild }}" == "true" ]; then
+            python scripts/smart_rebuild.py --force --create-version
+          else
+            python scripts/smart_rebuild.py --create-version
+          fi
+      
+      - name: Run tests
+        run: |
+          python -m pytest tests/ -v
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: memory-collections
+          path: |
+            data/qdrant/
+            data/version_registry.json
+            data/build_cache.json
+
+  deploy:
+    name: Deploy to Production
+    needs: build-memories
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: memory-collections
+          path: data/
+      
+      - name: Deploy to server
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+        run: |
+          # Setup SSH
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # Deploy files
+          rsync -avz --delete data/ $SERVER_USER@$SERVER_HOST:/path/to/twinself/data/
+          
+          # Restart service
+          ssh $SERVER_USER@$SERVER_HOST "systemctl restart twinself-api"
+      
+      - name: Health check
+        run: |
+          sleep 10
+          curl -f http://${{ secrets.SERVER_HOST }}/chatbot/api/health || exit 1

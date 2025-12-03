@@ -1,0 +1,260 @@
+{
+  "versions": [
+    {
+      "version_id": "v1_20251126_112413",
+      "timestamp": "2025-11-26T11:24:13.400181",
+      "collections": {
+        "hoangvu_semantic_memory_hg": 9,
+        "hoangvu_episodic_memory_hg": 27,
+        "hoangvu_procedural_memory_hg": 4
+      },
+      "data_hash": {
+        "semantic": "216ff460e434629da1b9a3c7d77c2b959ebfe3cae668383ccf7dd633fe04f316",
+        "episodic": "3d8f6108019f37bb02e0b60e4206a163ff856179b0819285471f889f013af1b7",
+        "procedural": "134c8164d82f591eab408e05ee86ec9f080d9646b6b86bdcc9eb50c79d76fb5d"
+      },
+      "metadata": {
+        "changes": {
+          "semantic": {
+            "added": 6,
+            "modified": 0,
+            "deleted": 0,
+            "total_changes": 6
+          },
+          "episodic": {
+            "added": 3,
+            "modified": 0,
+            "deleted": 0,
+            "total_changes": 3
+          },
+          "procedural": {
+            "added": 1,
+            "modified": 0,
+            "deleted": 0,
+            "total_changes": 2
+          }
+        }
+      },
+      "is_active": false,
+      "system_prompt_file": null
+    },
+    {
+      "version_id": "v2_20251126_135213",
+      "timestamp": "2025-11-26T13:52:13.156296",
+      "collections": {
+        "hoangvu_semantic_memory_hg": 18,
+        "hoangvu_episodic_memory_hg": 54,
+        "hoangvu_procedural_memory_hg": 8
+      },
+      "data_hash": {
+        "semantic": "565ba7d7b588404274e51aca30bdcb80f259856dd04acf0189494f3781bdf66d",
+        "episodic": "3d8f6108019f37bb02e0b60e4206a163ff856179b0819285471f889f013af1b7",
+        "procedural": "d16059678190f898d1bd1577f55bc67433171b793a85359b982ddaf46372eaa1"
+      },
+      "metadata": {
+        "changes": {
+          "semantic": {
+            "added": 0,
+            "modified": 2,
+            "deleted": 0,
+            "total_changes": 2
+          },
+          "episodic": {
+            "added": 0,
+            "modified": 0,
+            "deleted": 0,
+            "total_changes": 0
+          },
+          "procedural": {
+            "added": 0,
+            "modified": 0,
+            "deleted": 0,
+            "total_changes": 1
+          }
+        }
+      },
+      "is_active": false,
+      "system_prompt_file": null
+    },
+    {
+      "version_id": "v3_20251201_181206",
+      "timestamp": "2025-12-01T18:12:06.748994",
+      "collections": {
+        "hoangvu_semantic_memory_hg": 29,
+        "hoangvu_episodic_memory_hg": 54,
+        "hoangvu_procedural_memory_hg": 8
+      },
+      "data_hash": {
+        "semantic": "d0dc92d0b9653f42d172e89c26147a583201302ab0806e103ab8c75445148334",
+        "episodic": "3d8f6108019f37bb02e0b60e4206a163ff856179b0819285471f889f013af1b7",
+        "procedural": "d16059678190f898d1bd1577f55bc67433171b793a85359b982ddaf46372eaa1",
+        "system_prompt": "542d867fe9baebe36b92656b88c739343b9e1d656d3c7cdf87a073a2d7f201d2"
+      },
+      "metadata": {
+        "changes": {
+          "semantic": {
+            "added": 1,
+            "modified": 2,
+            "deleted": 0,
+            "total_changes": 3
+          },
+          "episodic": {
+            "added": 0,
+            "modified": 0,
+            "deleted": 0,
+            "total_changes": 0
+          },
+          "procedural": {
+            "added": 0,
+            "modified": 0,
+            "deleted": 0,
+            "total_changes": 0
+          },
+          "system_prompt": {
+            "added": 1,
+            "modified": 0,
+            "deleted": 0,
+            "total_changes": 1
+          }
+        }
+      },
+      "is_active": false,
+      "system_prompt_file": "system_prompts\\default_prompt.md"
+    },
+    {
+      "version_id": "v4_20251201_181327",
+      "timestamp": "2025-12-01T18:13:27.541158",
+      "collections": {
+        "hoangvu_semantic_memory_hg": 29,
+        "hoangvu_episodic_memory_hg": 54,
+        "hoangvu_procedural_memory_hg": 8
+      },
+      "data_hash": {
+        "semantic": "d0dc92d0b9653f42d172e89c26147a583201302ab0806e103ab8c75445148334",
+        "episodic": "3d8f6108019f37bb02e0b60e4206a163ff856179b0819285471f889f013af1b7",
+        "procedural": "d16059678190f898d1bd1577f55bc67433171b793a85359b982ddaf46372eaa1",
+        "system_prompt": "542d867fe9baebe36b92656b88c739343b9e1d656d3c7cdf87a073a2d7f201d2"
+      },
+      "metadata": {
+        "changes": {
+          "semantic": {
+            "added": 0,
+            "modified": 0,
+            "deleted": 0,
+            "total_changes": 0
+          },
+          "episodic": {
+            "added": 0,
+            "modified": 0,
+            "deleted": 0,
+            "total_changes": 0
+          },
+          "procedural": {
+            "added": 0,
+            "modified": 0,
+            "deleted": 0,
+            "total_changes": 0
+          },
+          "system_prompt": {
+            "added": 1,
+            "modified": 0,
+            "deleted": 0,
+            "total_changes": 1
+          }
+        }
+      },
+      "is_active": false,
+      "system_prompt_file": "system_prompts\\default_prompt.md"
+    },
+    {
+      "version_id": "v5_20251202_164036",
+      "timestamp": "2025-12-02T16:40:36.739480",
+      "collections": {
+        "hoangvu_semantic_memory_hg": 29,
+        "hoangvu_episodic_memory_hg": 84,
+        "hoangvu_procedural_memory_hg": 12
+      },
+      "data_hash": {
+        "semantic": "d0dc92d0b9653f42d172e89c26147a583201302ab0806e103ab8c75445148334",
+        "episodic": "f519584546598f211567bf3f6e6dd16e695f0541160a75e3c2af0901446394c6",
+        "procedural": "5e3cd165b55d26e163045d1796619bbc1d0d7b952e25f5980f59660864233852",
+        "system_prompt": "42f83645118ed678c1195dd046b37145e13a33119993b6504876f5dedc6b4bcb"
+      },
+      "metadata": {
+        "changes": {
+          "semantic": {
+            "added": 0,
+            "modified": 0,
+            "deleted": 0,
+            "total_changes": 0
+          },
+          "episodic": {
+            "added": 1,
+            "modified": 2,
+            "deleted": 0,
+            "total_changes": 3
+          },
+          "procedural": {
+            "added": 0,
+            "modified": 0,
+            "deleted": 0,
+            "total_changes": 1
+          },
+          "system_prompt": {
+            "added": 2,
+            "modified": 0,
+            "deleted": 0,
+            "total_changes": 2
+          }
+        }
+      },
+      "is_active": false,
+      "system_prompt_file": "system_prompts\\default_prompt.md"
+    },
+    {
+      "version_id": "v6_20251202_164225",
+      "timestamp": "2025-12-02T16:42:25.963155",
+      "collections": {
+        "hoangvu_semantic_memory_hg": 40,
+        "hoangvu_episodic_memory_hg": 84,
+        "hoangvu_procedural_memory_hg": 12
+      },
+      "data_hash": {
+        "semantic": "d9c3c25832c1a62803361f9bc91e503549066ff0fd33a5b5922b601139a78672",
+        "episodic": "f519584546598f211567bf3f6e6dd16e695f0541160a75e3c2af0901446394c6",
+        "procedural": "5e3cd165b55d26e163045d1796619bbc1d0d7b952e25f5980f59660864233852",
+        "system_prompt": "42f83645118ed678c1195dd046b37145e13a33119993b6504876f5dedc6b4bcb"
+      },
+      "metadata": {
+        "changes": {
+          "semantic": {
+            "added": 0,
+            "modified": 1,
+            "deleted": 0,
+            "total_changes": 1
+          },
+          "episodic": {
+            "added": 0,
+            "modified": 0,
+            "deleted": 0,
+            "total_changes": 0
+          },
+          "procedural": {
+            "added": 0,
+            "modified": 0,
+            "deleted": 0,
+            "total_changes": 0
+          },
+          "system_prompt": {
+            "added": 2,
+            "modified": 0,
+            "deleted": 0,
+            "total_changes": 2
+          }
+        }
+      },
+      "is_active": true,
+      "system_prompt_file": "system_prompts\\default_prompt.md"
+    }
+  ]
+}
