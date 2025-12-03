@@ -1,200 +1,220 @@
-# TwinSelf - Digital Twin Chatbot
+# TwinSelf - Core Library
 
-A RAG-based chatbot system that creates a digital twin using three types of memory: Semantic, Episodic, and Procedural.
+A RAG-based chatbot library that creates a digital twin using three types of memory: Semantic, Episodic, and Procedural.
 
 ## Features
 
 - **RAG Architecture**: Retrieval-Augmented Generation with Qdrant vector database
 - **Three Memory Types**: Semantic (facts), Episodic (examples), Procedural (rules)
-- **MLOps Pipeline**: MLflow tracking and DeepEval quality evaluation
 - **Version Control**: Data versioning with snapshot and rollback support
-- **User Feedback**: Collect and integrate user suggestions
-- **Production Ready**: FastAPI server with streaming support
+- **Incremental Updates**: Smart rebuild only changed data
+- **Vietnamese Support**: Optimized for Vietnamese language
+
+## Installation
+
+```bash
+pip install -r requirements.txt
+```
 
 ## Quick Start
 
-### Prerequisites
-
-- Python 3.9+
-- Google API Key (Gemini)
-
-### Installation
+### 1. Configure Environment
 
 ```bash
-# Clone repository
-git clone https://github.com/hoangvu1806/TwinSelf.git
-cd TwinSelf
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Configure environment
 cp .env.example .env
 # Edit .env and add your GOOGLE_API_KEY
 ```
 
-### Build Memory
+### 2. Prepare Your Data
 
-```bash
-python scripts/smart_rebuild.py --create-version
-```
-
-### Start Server
-
-```bash
-python mlops_server.py
-```
-
-Server runs at: http://localhost:8001
-
-API docs: http://localhost:8001/docs
-
-## Usage
-
-### Chat API
-
-```bash
-curl -X POST "http://localhost:8001/chat" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "session_id": "user123",
-    "message": "What are your skills?"
-  }'
-```
-
-### Python Client
-
-```python
-import requests
-
-response = requests.post(
-    "http://localhost:8001/chat",
-    json={
-        "session_id": "user123",
-        "message": "Tell me about your experience"
-    }
-)
-
-print(response.json()["response"])
-```
-
-## Project Structure
-
-```
-TwinSelf/
-├── mlops_server.py          # Production server
-├── twinself/                # Core library
-│   ├── chatbot.py           # Main chatbot class
-│   ├── core/                # Core components
-│   └── services/            # Services (embedding, etc.)
-├── scripts/                 # Utility scripts
-├── semantic_data/           # Facts and knowledge (markdown)
-├── episodic_data/           # Conversation examples (json)
-├── procedural_data/         # Response rules (json)
-├── system_prompts/          # System prompts
-├── docs/                    # Documentation
-└── tests/                   # Tests
-```
-
-## Adding Your Data
-
-### Semantic Memory (Facts)
-
-Create markdown files in `semantic_data/`:
-
+**Semantic Data** (facts) - `semantic_data/*.md`:
 ```markdown
 # About Me
-I am a software engineer with 5 years of experience...
+I am a software engineer...
 ```
 
-### Episodic Memory (Examples)
-
-Create JSON files in `episodic_data/`:
-
+**Episodic Data** (examples) - `episodic_data/*.json`:
 ```json
 [
   {
-    "user_query": "What projects have you worked on?",
-    "your_response": "I have worked on several AI projects..."
+    "user_query": "What are your skills?",
+    "your_response": "I am proficient in Python..."
   }
 ]
 ```
 
-### Rebuild After Changes
+**Procedural Data** (rules) - `procedural_data/*.json`:
+```json
+[
+  {
+    "rule": "Always respond in first person",
+    "example": "I have experience in..."
+  }
+]
+```
+
+### 3. Build Memory
 
 ```bash
 python scripts/smart_rebuild.py --create-version
 ```
 
-## Documentation
+### 4. Use in Your Code
 
-- [Architecture](docs/ARCHITECTURE.md) - System design
-- [Quick Start](docs/QUICKSTART.md) - Detailed setup guide
-- [API Reference](docs/API_REFERENCE.md) - API endpoints
-- [Data Management](docs/DATA_MANAGEMENT.md) - Managing memory data
-- [MLOps Pipeline](docs/MLOPS_PIPELINE.md) - MLflow and DeepEval
-- [Deployment](docs/DEPLOYMENT.md) - Production deployment
+```python
+from twinself import DigitalTwinChatbot
 
-## Key Commands
+# Initialize chatbot
+chatbot = DigitalTwinChatbot()
+
+# Chat
+response = chatbot.chat("What are your skills?")
+print(response)
+
+# Chat with context
+context = "Previous conversation..."
+response = chatbot.chat("Tell me more", context=context)
+print(response)
+
+# Streaming
+for chunk in chatbot.chat("Hello", stream=True):
+    print(chunk, end="", flush=True)
+```
+
+## Library Structure
+
+```
+twinself/
+├── __init__.py              # Main exports
+├── chatbot.py               # DigitalTwinChatbot class
+├── core/
+│   ├── config.py            # Configuration
+│   ├── version_manager.py   # Version control
+│   ├── incremental_builder.py  # Smart rebuild
+│   └── exceptions.py        # Custom exceptions
+├── services/
+│   └── embedding_service.py # Embedding generation
+└── utils/
+    ├── prompt_loader.py     # System prompt loader
+    └── generate_rules_from_episodic_data.py
+```
+
+## Scripts
 
 ```bash
-# Rebuild memory
+# Build memory from data files
 python scripts/smart_rebuild.py --create-version
 
-# Validate data
+# Validate data files
 python scripts/validate_data.py
 
-# List versions
+# Manage versions
 python scripts/version_manager_cli.py list
-
-# Rollback to version
 python scripts/version_manager_cli.py rollback <version_id>
 
-# Run tests
-python tests/test_api.py
+# Manage system prompts
+python scripts/manage_system_prompt.py list
+python scripts/manage_system_prompt.py create my_prompt.md
+
+# Process user feedback
+python scripts/process_user_suggestions.py --merge --archive
 ```
-
-## MLOps Features
-
-### MLflow Tracking
-
-```bash
-# Start MLflow UI
-mlflow ui --host 0.0.0.0 --port 5000
-```
-
-View metrics at: http://localhost:5000
-
-### DeepEval Quality Evaluation
-
-Automatically evaluates response quality:
-- Answer Relevancy
-- Faithfulness to context
-
-Metrics logged to MLflow asynchronously.
 
 ## Configuration
 
-Edit `.env` file:
+Edit `.env`:
 
 ```bash
 # Required
 GOOGLE_API_KEY=your_api_key_here
-GOOGLE_API_KEY_4DEEPEVAL=your_deepeval_key_here
 
 # Optional
 USER_PREFIX=your_name
 EMBEDDING_MODEL_NAME=dangvantuan/vietnamese-document-embedding
+MODEL_CACHE_FOLDER=./models
+```
+
+## API Reference
+
+### DigitalTwinChatbot
+
+```python
+from twinself import DigitalTwinChatbot
+
+chatbot = DigitalTwinChatbot(
+    bot_name="YourName",           # Optional
+    system_prompt="Custom prompt"  # Optional
+)
+
+# Non-streaming
+response = chatbot.chat(
+    user_message="Your question",
+    context="Previous conversation",  # Optional
+    stream=False
+)
+
+# Streaming
+for chunk in chatbot.chat(user_message="Hello", stream=True):
+    print(chunk, end="")
+
+# With retrieved context
+result = chatbot.chat(
+    user_message="Your question",
+    return_retrieved_context=True
+)
+print(result["response"])
+print(result["retrieved_docs"])
+```
+
+## Data Management
+
+### Version Control
+
+```python
+from twinself.core.version_manager import VersionManager
+
+vm = VersionManager()
+
+# List versions
+versions = vm.list_versions()
+
+# Get active version
+active = vm.get_active_version()
+
+# Rollback
+vm.rollback_to_version("v1_20251201_143000")
+
+# Create snapshot
+vm.create_snapshot("v1_20251201_143000")
+```
+
+### Incremental Builder
+
+```python
+from twinself.core.incremental_builder import IncrementalBuilder
+
+builder = IncrementalBuilder()
+
+# Check changes
+changes = builder.get_change_summary("semantic_data", "semantic")
+print(f"Changes: {changes['total_changes']}")
+
+# Update cache after rebuild
+builder.update_cache("semantic_data", "semantic")
 ```
 
 ## Tech Stack
 
 - **LLM**: Google Gemini
-- **Embeddings**: Vietnamese Document Embedding
+- **Embeddings**: Vietnamese Document Embedding (768 dim)
 - **Vector DB**: Qdrant (local)
-- **Framework**: FastAPI
-- **MLOps**: MLflow, DeepEval
 - **Language**: Python 3.9+
+
+## Documentation
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Quick Start](docs/QUICKSTART.md)
+- [Data Management](docs/DATA_MANAGEMENT.md)
 
 ## License
 
