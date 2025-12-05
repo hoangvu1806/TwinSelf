@@ -6,15 +6,18 @@ python-dotenv>=1.0.0
 
 # LLM
 langchain>=0.1.0
+langchain-core>=0.1.0
 langchain-google-genai>=1.0.0
 google-generativeai>=0.3.0
 
 # Vector Database
 qdrant-client>=1.7.0
+langchain-qdrant>=0.1.0
 
 # Embeddings
 sentence-transformers>=2.2.0
 torch>=2.0.0
+langchain-huggingface>=0.0.1
 
 # MLOps
 mlflow>=2.9.0
