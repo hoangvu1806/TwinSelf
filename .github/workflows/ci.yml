@@ -12,7 +12,7 @@ jobs:
 
         strategy:
             matrix:
-                python-version: ["3.11"]
+                python-version: ["3.9", "3.10", "3.11"]
 
         steps:
             - uses: actions/checkout@v4
@@ -49,10 +49,10 @@ jobs:
             - name: Run unit tests
               shell: pwsh
               env:
-                  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY || 'test-key' }}
+                  GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY || 'test-key' }}
                   MLFLOW_TRACKING_URI: http://localhost:5000
               run: |
-                  pytest tests/ -v --cov=twinself --cov-report=xml --cov-report=term
+                  pytest tests/ -v --cov=twinself --cov-report=xml --cov-report=term --maxfail=3
 
             - name: Upload coverage to Codecov
               uses: codecov/codecov-action@v3
