@@ -12,13 +12,22 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 @pytest.fixture
 def client():
-    """Test client with mocked chatbot"""
-    with patch('mlops_server.DigitalTwinChatbot') as mock_chatbot_class:
-        # Create mock chatbot instance
+    """Test client with mocked chatbot and MLflow"""
+    with patch('mlops_server.DigitalTwinChatbot') as mock_chatbot_class, \
+         patch('mlops_server.MlflowClient') as mock_mlflow_client, \
+         patch('mlops_server.GeminiEvalModel') as mock_gemini:
+        
+        # Mock chatbot instance
         chatbot_instance = Mock()
         chatbot_instance.bot_name = "Test Bot"
         chatbot_instance.chat.return_value = "Test response"
         mock_chatbot_class.return_value = chatbot_instance
+        
+        # Mock MLflow client
+        mock_mlflow_client.return_value = Mock()
+        
+        # Mock Gemini model
+        mock_gemini.return_value = Mock()
         
         # Import app after patching
         from mlops_server import app
