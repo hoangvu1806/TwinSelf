@@ -108,6 +108,8 @@ class HealthResponse(BaseModel):
     status: str
     bot_name: str
     active_sessions: int
+    mlflow_connected: bool
+    mlflow_tracking_uri: Optional[str] = None
 
 def get_post_detail(url:str) -> str:
     for f in os.listdir(post_dir):
@@ -185,7 +187,9 @@ async def health_check():
     return HealthResponse(
         status="healthy",
         bot_name=chatbot.bot_name,
-        active_sessions=len(sessions)
+        active_sessions=len(sessions),
+        mlflow_connected=mlflow_client is not None,
+        mlflow_tracking_uri=MLFLOW_TRACKING_URI if mlflow_client else None
     )
 
 
@@ -295,4 +299,4 @@ if __name__ == "__main__":
     reload = os.getenv("RELOAD", "true").lower() == "true"
 
     print(f"Starting TwinSelf API server on {host}:{port}")
-    uvicorn.run("advanced_server:app", host=host, port=port, reload=reload, log_level="info")
+    uvicorn.run("portforlio_server:app", host=host, port=port, reload=reload, log_level="info")
