@@ -75,24 +75,24 @@ def main():
     system_prompt_changes = builder.get_change_summary(config.system_prompts_dir, 'system_prompt')
     
     print(f"\n  Semantic Memory:  {semantic_changes['total_changes']} changes")
-    print(f"    ├─ Added:       {semantic_changes['added']}")
-    print(f"    ├─ Modified:    {semantic_changes['modified']}")
-    print(f"    └─ Deleted:     {semantic_changes['deleted']}")
+    print(f"    - Added:       {semantic_changes['added']}")
+    print(f"    - Modified:    {semantic_changes['modified']}")
+    print(f"    - Deleted:     {semantic_changes['deleted']}")
     
     print(f"\n  Episodic Memory:  {episodic_changes['total_changes']} changes")
-    print(f"    ├─ Added:       {episodic_changes['added']}")
-    print(f"    ├─ Modified:    {episodic_changes['modified']}")
-    print(f"    └─ Deleted:     {episodic_changes['deleted']}")
+    print(f"    - Added:       {episodic_changes['added']}")
+    print(f"    - Modified:    {episodic_changes['modified']}")
+    print(f"    - Deleted:     {episodic_changes['deleted']}")
     
     print(f"\n  Procedural Memory: {procedural_changes['total_changes']} changes")
-    print(f"    ├─ Added:       {procedural_changes['added']}")
-    print(f"    ├─ Modified:    {procedural_changes['modified']}")
-    print(f"    └─ Deleted:     {procedural_changes['deleted']}")
+    print(f"    - Added:       {procedural_changes['added']}")
+    print(f"    - Modified:    {procedural_changes['modified']}")
+    print(f"    - Deleted:     {procedural_changes['deleted']}")
     
     print(f"\n  System Prompt:    {system_prompt_changes['total_changes']} changes")
-    print(f"    ├─ Added:       {system_prompt_changes['added']}")
-    print(f"    ├─ Modified:    {system_prompt_changes['modified']}")
-    print(f"    └─ Deleted:     {system_prompt_changes['deleted']}")
+    print(f"    - Added:       {system_prompt_changes['added']}")
+    print(f"    - Modified:    {system_prompt_changes['modified']}")
+    print(f"    - Deleted:     {system_prompt_changes['deleted']}")
     
     total_changes = (
         semantic_changes['total_changes'] +

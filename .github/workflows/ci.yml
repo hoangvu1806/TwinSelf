@@ -38,7 +38,10 @@ jobs:
               shell: pwsh
               env:
                   GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+                  PYTHONIOENCODING: utf-8
               run: |
+                  $env:PYTHONIOENCODING = "utf-8"
+                  [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
                   python scripts/smart_rebuild.py --create-version
 
             - name: Start MLflow server
@@ -52,8 +55,10 @@ jobs:
               env:
                   GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
                   MLFLOW_TRACKING_URI: http://localhost:5000
+                  PYTHONIOENCODING: utf-8
               run: |
-                  Start-Process powershell -ArgumentList "-Command", "python mlops_server.py" -WindowStyle Hidden
+                  $env:PYTHONIOENCODING = "utf-8"
+                  Start-Process powershell -ArgumentList "-Command", "`$env:PYTHONIOENCODING='utf-8'; python mlops_server.py" -WindowStyle Hidden
                   Start-Sleep -Seconds 30
 
             - name: Wait for services to be ready
