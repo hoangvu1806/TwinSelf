@@ -22,7 +22,6 @@ async def lifespan(app: FastAPI):
     """Initialize chatbot on startup"""
     global chatbot
     try:
-        print("Initializing Digital Twin Chatbot...")
         chatbot = DigitalTwinChatbot(bot_name="Hoàng Vũ")
         print("Chatbot initialized successfully!")
         yield

@@ -1,34 +1,27 @@
-# TwinSelf - Digital Twin Chatbot
+# Portfolio Chatbot Server
 
-A RAG-based chatbot system that creates a digital twin using three types of memory: Semantic, Episodic, and Procedural.
+A stateless chatbot server designed for portfolio websites with context-aware conversations.
 
 ## Features
 
-- **RAG Architecture**: Retrieval-Augmented Generation with Qdrant vector database
-- **Three Memory Types**: Semantic (facts), Episodic (examples), Procedural (rules)
-- **MLOps Pipeline**: MLflow tracking and DeepEval quality evaluation
-- **Version Control**: Data versioning with snapshot and rollback support
-- **User Feedback**: Collect and integrate user suggestions
-- **Production Ready**: FastAPI server with streaming support
+- **Stateless Design**: Frontend provides conversation history
+- **Context Awareness**: Understands current page, URL, and user context
+- **Blog Post Integration**: Can read and discuss blog post content
+- **Session Tracking**: Tracks user activity without storing history
+- **Streaming Support**: Real-time response streaming
+- **CORS Enabled**: Ready for frontend integration
 
 ## Quick Start
-
-### Prerequisites
-
-- Python 3.9+
-- Google API Key (Gemini)
 
 ### Installation
 
 ```bash
-# Clone repository
-git clone https://github.com/hoangvu1806/TwinSelf.git
-cd TwinSelf
-
-# Install dependencies
 pip install -r requirements.txt
+```
 
-# Configure environment
+### Configuration
+
+```bash
 cp .env.example .env
 # Edit .env and add your GOOGLE_API_KEY
 ```
@@ -42,159 +35,277 @@ python scripts/smart_rebuild.py --create-version
 ### Start Server
 
 ```bash
-python mlops_server.py
+python portfolio_server.py
 ```
 
-Server runs at: http://localhost:8001
+Server runs at: http://localhost:8080
 
-API docs: http://localhost:8001/docs
+## API Endpoints
 
-## Usage
+### Health Check
 
-### Chat API
-
-```bash
-curl -X POST "http://localhost:8001/chat" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "session_id": "user123",
-    "message": "What are your skills?"
-  }'
+```
+GET /chatbot/api/health
 ```
 
-### Python Client
+Response:
+```json
+{
+  "status": "healthy",
+  "bot_name": "Hoàng Vũ",
+  "active_sessions": 5
+}
+```
 
-```python
-import requests
+### Chat (Streaming)
 
-response = requests.post(
-    "http://localhost:8001/chat",
-    json={
-        "session_id": "user123",
-        "message": "Tell me about your experience"
+```
+POST /chatbot/api/chat/stream
+```
+
+Request:
+```json
+{
+  "session_id": "user123",
+  "message": "Tell me about your experience",
+  "conversation": [
+    {
+      "id": 1,
+      "role": "user",
+      "content": "Hello",
+      "timestamp": "2025-12-01T10:00:00"
+    },
+    {
+      "id": 2,
+      "role": "assistant",
+      "content": "Hi! How can I help?",
+      "timestamp": "2025-12-01T10:00:01"
     }
-)
-
-print(response.json()["response"])
+  ],
+  "metadata": {
+    "url": "https://yoursite.com/about",
+    "timestamp": "2025-12-01T10:00:00",
+    "page_title": "About Me",
+    "context_type": "about_page"
+  }
+}
 ```
 
-## Project Structure
-
+Response: Server-Sent Events (SSE)
 ```
-TwinSelf/
-├── mlops_server.py          # Production server
-├── twinself/                # Core library
-│   ├── chatbot.py           # Main chatbot class
-│   ├── core/                # Core components
-│   └── services/            # Services (embedding, etc.)
-├── scripts/                 # Utility scripts
-├── semantic_data/           # Facts and knowledge (markdown)
-├── episodic_data/           # Conversation examples (json)
-├── procedural_data/         # Response rules (json)
-├── system_prompts/          # System prompts
-├── docs/                    # Documentation
-└── tests/                   # Tests
+data: I have
+data:  5 years
+data:  of experience...
+data: [DONE]
 ```
 
-## Adding Your Data
+### Chat (Non-Streaming)
 
-### Semantic Memory (Facts)
-
-Create markdown files in `semantic_data/`:
-
-```markdown
-# About Me
-I am a software engineer with 5 years of experience...
+```
+POST /chatbot/api/chat
 ```
 
-### Episodic Memory (Examples)
+Request: Same as streaming
 
-Create JSON files in `episodic_data/`:
+Response:
+```json
+{
+  "response": "I have 5 years of experience...",
+  "session_id": "user123",
+  "bot_name": "Hoàng Vũ"
+}
+```
+
+### List Sessions
+
+```
+GET /chatbot/api/sessions
+```
+
+Response:
+```json
+{
+  "sessions": [
+    {
+      "session_id": "user123",
+      "created_at": "2025-12-01T10:00:00",
+      "last_activity": "2025-12-01T10:05:00",
+      "message_count": 5
+    }
+  ],
+  "total_sessions": 1
+}
+```
+
+## Frontend Integration
+
+### JavaScript Example
+
+```javascript
+// Streaming chat
+const response = await fetch('http://localhost:8080/chatbot/api/chat/stream', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    session_id: 'user123',
+    message: 'What are your skills?',
+    conversation: conversationHistory,
+    metadata: {
+      url: window.location.href,
+      timestamp: new Date().toISOString(),
+      page_title: document.title,
+      context_type: 'skills_page'
+    }
+  })
+});
+
+const reader = response.body.getReader();
+const decoder = new TextDecoder();
+
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  
+  const chunk = decoder.decode(value);
+  const lines = chunk.split('\n');
+  
+  for (const line of lines) {
+    if (line.startsWith('data: ')) {
+      const content = line.slice(6);
+      if (content === '[DONE]') break;
+      console.log(content);
+    }
+  }
+}
+```
+
+### React Example
+
+```jsx
+import { useState } from 'react';
+
+function ChatBot() {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+
+  const sendMessage = async () => {
+    const response = await fetch('http://localhost:8080/chatbot/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        session_id: 'user123',
+        message: input,
+        conversation: messages,
+        metadata: {
+          url: window.location.href,
+          timestamp: new Date().toISOString(),
+          page_title: document.title
+        }
+      })
+    });
+
+    const data = await response.json();
+    setMessages([...messages, 
+      { role: 'user', content: input },
+      { role: 'assistant', content: data.response }
+    ]);
+    setInput('');
+  };
+
+  return (
+    <div>
+      {messages.map((msg, i) => (
+        <div key={i}>{msg.role}: {msg.content}</div>
+      ))}
+      <input value={input} onChange={e => setInput(e.target.value)} />
+      <button onClick={sendMessage}>Send</button>
+    </div>
+  );
+}
+```
+
+## Blog Post Integration
+
+The server can read blog post content when user asks about specific posts:
 
 ```json
-[
-  {
-    "user_query": "What projects have you worked on?",
-    "your_response": "I have worked on several AI projects..."
+{
+  "message": "What is this post about?",
+  "ask": "summarize",
+  "metadata": {
+    "url": "https://yoursite.com/blog/my-post",
+    "context_type": "blog_post"
   }
-]
+}
 ```
 
-### Rebuild After Changes
-
-```bash
-python scripts/smart_rebuild.py --create-version
+Configure blog post directory in `portfolio_server.py`:
+```python
+post_dir = r"path/to/your/blog/posts"
 ```
-
-## Documentation
-
-- [Architecture](docs/ARCHITECTURE.md) - System design
-- [Quick Start](docs/QUICKSTART.md) - Detailed setup guide
-- [API Reference](docs/API_REFERENCE.md) - API endpoints
-- [Data Management](docs/DATA_MANAGEMENT.md) - Managing memory data
-- [MLOps Pipeline](docs/MLOPS_PIPELINE.md) - MLflow and DeepEval
-- [Deployment](docs/DEPLOYMENT.md) - Production deployment
-
-## Key Commands
-
-```bash
-# Rebuild memory
-python scripts/smart_rebuild.py --create-version
-
-# Validate data
-python scripts/validate_data.py
-
-# List versions
-python scripts/version_manager_cli.py list
-
-# Rollback to version
-python scripts/version_manager_cli.py rollback <version_id>
-
-# Run tests
-python tests/test_api.py
-```
-
-## MLOps Features
-
-### MLflow Tracking
-
-```bash
-# Start MLflow UI
-mlflow ui --host 0.0.0.0 --port 5000
-```
-
-View metrics at: http://localhost:5000
-
-### DeepEval Quality Evaluation
-
-Automatically evaluates response quality:
-- Answer Relevancy
-- Faithfulness to context
-
-Metrics logged to MLflow asynchronously.
 
 ## Configuration
 
-Edit `.env` file:
+### Environment Variables
 
 ```bash
-# Required
-GOOGLE_API_KEY=your_api_key_here
-GOOGLE_API_KEY_4DEEPEVAL=your_deepeval_key_here
+# .env
+GOOGLE_API_KEY=your_api_key
+HOST=0.0.0.0
+PORT=8080
+RELOAD=true
+```
 
-# Optional
-USER_PREFIX=your_name
-EMBEDDING_MODEL_NAME=dangvantuan/vietnamese-document-embedding
+### Server Settings
+
+Edit `portfolio_server.py`:
+```python
+# Bot name
+chatbot = DigitalTwinChatbot(bot_name="Your Name")
+
+# Blog post directory
+post_dir = r"path/to/posts"
+
+# Port
+port = int(os.getenv("PORT", "8080"))
+```
+
+## Deployment
+
+### Docker
+
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY . .
+RUN python scripts/smart_rebuild.py
+
+EXPOSE 8080
+CMD ["python", "portfolio_server.py"]
+```
+
+### Nginx Reverse Proxy
+
+```nginx
+location /chatbot/api/ {
+    proxy_pass http://localhost:8080/chatbot/api/;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+}
 ```
 
 ## Tech Stack
 
-- **LLM**: Google Gemini
-- **Embeddings**: Vietnamese Document Embedding
-- **Vector DB**: Qdrant (local)
 - **Framework**: FastAPI
-- **MLOps**: MLflow, DeepEval
-- **Language**: Python 3.9+
+- **LLM**: Google Gemini
+- **Vector DB**: Qdrant (local)
+- **Embeddings**: Vietnamese Document Embedding
 
 ## License
 

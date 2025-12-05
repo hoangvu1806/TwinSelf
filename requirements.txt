@@ -15,14 +15,3 @@ qdrant-client>=1.7.0
 # Embeddings
 sentence-transformers>=2.2.0
 torch>=2.0.0
-
-# MLOps
-mlflow>=2.9.0
-deepeval>=3.0.0
-
-# Monitoring (optional)
-prometheus-client>=0.19.0
-
-# Utilities
-nest-asyncio>=1.5.0
-tenacity>=8.2.0
