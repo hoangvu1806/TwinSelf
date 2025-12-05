@@ -24,6 +24,9 @@ import json
 import mlflow
 from mlflow.tracking import MlflowClient
 
+# Token counting
+import tiktoken
+
 # DeepEval (optional)
 try:
     from deepeval.metrics import AnswerRelevancyMetric, FaithfulnessMetric
@@ -183,9 +186,15 @@ class EditSuggestionResponse(BaseModel):
 
 
 # Helper functions
-def _estimate_tokens(text: str) -> int:
-    """Estimate token count (chars / 4 for Vietnamese)"""
-    return len(text) // 4
+def _estimate_tokens(text: str, model: str = "gpt-3.5-turbo") -> int:
+    """Count tokens using tiktoken"""
+    try:
+        encoding = tiktoken.encoding_for_model(model)
+        return len(encoding.encode(text))
+    except Exception as e:
+        # Fallback to simple estimation if tiktoken fails
+        print(f"Tiktoken failed: {e}, using fallback estimation")
+        return len(text) // 4
 
 
 def _safe_mlflow_log(func, *args, **kwargs):
