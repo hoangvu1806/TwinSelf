@@ -20,15 +20,17 @@ pytest tests/ --cov=twinself --cov-report=term-missing
 ```
 
 **What's tested:**
-- ✅ API endpoint logic
-- ✅ Request/response validation
-- ✅ Error handling
-- ✅ Data models
+
+-   ✅ API endpoint logic
+-   ✅ Request/response validation
+-   ✅ Error handling
+-   ✅ Data models
 
 **What's mocked:**
-- Chatbot (DigitalTwinChatbot)
-- MLflow client
-- Gemini evaluation model
+
+-   Chatbot (DigitalTwinChatbot)
+-   MLflow client
+-   Gemini evaluation model
 
 ## Integration Tests (Slow, Real Services)
 
@@ -39,11 +41,13 @@ pytest tests/ --cov=twinself --cov-report=term-missing
 ### Prerequisites
 
 1. Start MLflow server:
+
 ```bash
 mlflow server --host 127.0.0.1 --port 5000
 ```
 
 2. Start MLOps server:
+
 ```bash
 python mlops_server.py
 ```
@@ -51,21 +55,24 @@ python mlops_server.py
 ### Run Integration Tests
 
 **Option 1: Manual**
+
 ```bash
 pytest tests/test_integration.py -v -m integration
 ```
 
 **Option 2: Automated (Windows)**
+
 ```powershell
 .\scripts\run_integration_tests.ps1
 ```
 
 **What's tested:**
-- ✅ Real chatbot responses
-- ✅ MLflow connection and logging
-- ✅ Qdrant vector search
-- ✅ End-to-end conversation flow
-- ✅ User feedback storage
+
+-   ✅ Real chatbot responses
+-   ✅ MLflow connection and logging
+-   ✅ Qdrant vector search
+-   ✅ End-to-end conversation flow
+-   ✅ User feedback storage
 
 ## Test Structure
 
@@ -94,11 +101,13 @@ GitHub Actions automatically runs unit tests on every push:
 ## Best Practices
 
 ### For Development
+
 1. Run unit tests frequently: `pytest tests/ -v`
 2. Check coverage: `pytest tests/ --cov=twinself`
 3. Fix failing tests before committing
 
 ### Before Deployment
+
 1. Run integration tests: `pytest tests/test_integration.py -v`
 2. Verify all services are working
 3. Check MLflow logs for errors
@@ -107,6 +116,7 @@ GitHub Actions automatically runs unit tests on every push:
 ### Writing New Tests
 
 **Unit Test Example:**
+
 ```python
 def test_new_endpoint(client):
     """Test new endpoint with mocked services"""
@@ -115,6 +125,7 @@ def test_new_endpoint(client):
 ```
 
 **Integration Test Example:**
+
 ```python
 @pytest.mark.integration
 def test_new_feature(check_services):
@@ -129,19 +140,22 @@ def test_new_feature(check_services):
 ## Troubleshooting
 
 ### Unit Tests Slow?
-- Check if services are mocked properly
-- Ensure `TestClient` is used (not real HTTP requests)
+
+-   Check if services are mocked properly
+-   Ensure `TestClient` is used (not real HTTP requests)
 
 ### Integration Tests Fail?
-- Verify MLflow is running: `curl http://localhost:5000/health`
-- Verify MLOps server is running: `curl http://localhost:8001/health`
-- Check server logs for errors
-- Wait for chatbot initialization (~30s)
+
+-   Verify MLflow is running: `curl http://localhost:5000/health`
+-   Verify MLOps server is running: `curl http://localhost:8001/health`
+-   Check server logs for errors
+-   Wait for chatbot initialization (~30s)
 
 ### Coverage Too Low?
-- Add tests for uncovered code
-- Focus on critical paths first
-- Aim for >80% coverage
+
+-   Add tests for uncovered code
+-   Focus on critical paths first
+-   Aim for >80% coverage
 
 ## Quick Reference
 
