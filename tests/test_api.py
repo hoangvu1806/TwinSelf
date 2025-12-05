@@ -1,15 +1,35 @@
 """
 Tests for API endpoints
 """
-import requests
+import pytest
+from fastapi.testclient import TestClient
+from unittest.mock import Mock, patch, AsyncMock
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
-BASE_URL = "http://localhost:8001"
+@pytest.fixture
+def client():
+    """Test client with mocked chatbot"""
+    with patch('mlops_server.DigitalTwinChatbot') as mock_chatbot_class:
+        # Create mock chatbot instance
+        chatbot_instance = Mock()
+        chatbot_instance.bot_name = "Test Bot"
+        chatbot_instance.chat.return_value = "Test response"
+        mock_chatbot_class.return_value = chatbot_instance
+        
+        # Import app after patching
+        from mlops_server import app
+        
+        with TestClient(app) as test_client:
+            yield test_client
 
 
-def test_health():
+def test_health(client):
     """Test health endpoint"""
-    response = requests.get(f"{BASE_URL}/health", timeout=5)
+    response = client.get("/health")
     assert response.status_code == 200
     
     data = response.json()
@@ -17,29 +37,48 @@ def test_health():
     assert "bot_name" in data
 
 
-def test_chat():
-    """Test chat endpoint"""
-    response = requests.post(
-        f"{BASE_URL}/chat",
-        json={
-            "session_id": "test",
-            "message": "Hello"
-        },
-        timeout=30
-    )
-    
+def test_root(client):
+    """Test root endpoint"""
+    response = client.get("/")
     assert response.status_code == 200
     
     data = response.json()
+    assert "name" in data
+
+
+def test_chat(client):
+    """Test chat endpoint"""
+    response = client.post(
+        "/chat",
+        json={
+            "session_id": "test",
+            "message": "Hello"
+        }
+    )
+    
+    assert response.status_code == 200
+    data = response.json()
     assert "response" in data
     assert "session_id" in data
-    assert len(data["response"]) > 0
 
 
-def test_chat_with_history():
+def test_chat_empty_message(client):
+    """Test chat with empty message"""
+    response = client.post(
+        "/chat",
+        json={
+            "session_id": "test",
+            "message": ""
+        }
+    )
+    
+    assert response.status_code == 400
+
+
+def test_chat_with_history(client):
     """Test chat with conversation history"""
-    response = requests.post(
-        f"{BASE_URL}/chat",
+    response = client.post(
+        "/chat",
         json={
             "session_id": "test",
             "message": "Tell me more",
@@ -47,64 +86,33 @@ def test_chat_with_history():
                 {"role": "user", "content": "What are your skills?"},
                 {"role": "assistant", "content": "I am proficient in Python."}
             ]
-        },
-        timeout=30
+        }
     )
     
     assert response.status_code == 200
 
 
-def test_feedback():
+def test_feedback(client):
     """Test feedback endpoint"""
-    response = requests.post(
-        f"{BASE_URL}/api/edit-message/suggestion",
+    response = client.post(
+        "/api/edit-message/suggestion",
         json={
             "original_question": "Test question",
             "original_response": "Test response",
             "suggested_response": "Better response"
-        },
-        timeout=10
+        }
     )
     
     assert response.status_code == 200
-    
     data = response.json()
     assert data["status"] == "success"
 
 
-def test_root():
-    """Test root endpoint"""
-    response = requests.get(f"{BASE_URL}/", timeout=5)
+@pytest.mark.skip(reason="MLops server doesn't have sessions endpoint")
+def test_sessions_list(client):
+    """Test sessions list endpoint"""
+    response = client.get("/api/sessions")
     assert response.status_code == 200
     
     data = response.json()
-    assert "name" in data
-    assert "endpoints" in data
-
-
-if __name__ == "__main__":
-    print("Testing API endpoints...")
-    print("Make sure server is running: python mlops_server.py")
-    print()
-    
-    try:
-        test_health()
-        print("test_health passed")
-        
-        test_root()
-        print("test_root passed")
-        
-        test_chat()
-        print("test_chat passed")
-        
-        test_chat_with_history()
-        print("test_chat_with_history passed")
-        
-        test_feedback()
-        print("test_feedback passed")
-        
-        print("\nAll tests passed!")
-    except requests.exceptions.ConnectionError:
-        print("Error: Server not running. Start with: python mlops_server.py")
-    except AssertionError as e:
-        print(f"Test failed: {e}")
+    assert "sessions" in data

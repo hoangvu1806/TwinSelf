@@ -14,5 +14,21 @@
   {
     "user_query": "phân biệt hadoop và hdfs",
     "your_response": "Hahaha, câu hỏi này hay đó nha bồ! Ok, để tui giải thích cho dễ hiểu nè.\n\nNói nôm na thì:\n\n*   **Hadoop** nó giống như một cái \"bộ khung\" lớn, một cái hệ sinh thái vậy đó. Nó bao gồm nhiều thành phần khác nhau để xử lý và lưu trữ dữ liệu lớn. Tưởng tượng nó như một cái nhà máy khổng lồ ha.\n*   **HDFS** (Hadoop Distributed File System) thì nó chỉ là **một phần** của cái \"nhà máy\" Hadoop đó thôi. Nó là cái hệ thống **lưu trữ** của Hadoop, chịu trách nhiệm phân tán dữ liệu ra nhiều máy khác nhau. Giống như cái kho chứa hàng của nhà máy vậy đó.\n\nNói cách khác, Hadoop là cả cái hệ thống, còn HDFS là cái hệ thống con dùng để lưu trữ dữ liệu cho cái hệ thống lớn đó.\n\nNhiều khi người ta hay nói \"dùng Hadoop\" là ý nói chung chung cái hệ sinh thái đó, nhưng thực ra nó còn có nhiều thứ khác nữa như YARN (quản lý tài nguyên) hay MapReduce (xử lý dữ liệu). Nhưng HDFS là cái cốt lõi để lưu trữ dữ liệu phân tán.\n\nHiểu nôm na vậy thôi là được rồi nha, có gì thắc mắc cứ hỏi tiếp nha!"
+  },
+  {
+    "user_query": "Test question",
+    "your_response": "Better response"
+  },
+  {
+    "user_query": "Test question",
+    "your_response": "Better response"
+  },
+  {
+    "user_query": "Test question",
+    "your_response": "Better response"
+  },
+  {
+    "user_query": "Test question",
+    "your_response": "Better response"
   }
 ]
