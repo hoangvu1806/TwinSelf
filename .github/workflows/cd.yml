@@ -21,7 +21,6 @@ jobs:
                   D:\HOANGVU\VPS\TwinSelf\deploy.ps1
 
             - name: Start Portfolio Server
-              shell: pwsh
               run: |
                   Write-Host "Starting Portfolio Server..." -ForegroundColor Yellow
                   $process = Start-Process -FilePath "D:\HOANGVU\VPS\TwinSelf\start_portfolio_server.bat" -PassThru -WindowStyle Normal
