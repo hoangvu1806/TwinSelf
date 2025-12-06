@@ -7,47 +7,45 @@ on:
         branches: [main]
 
 jobs:
-    integration-test:
-        runs-on: self-hosted
-        timeout-minutes: 10
+    test:
+        runs-on: windows-latest
+        timeout-minutes: 30
 
         steps:
             - uses: actions/checkout@v4
 
-            - name: Set up Python
+            - name: Set up Python 3.11
               uses: actions/setup-python@v4
               with:
                   python-version: "3.11"
 
-            # Dependencies already installed on self-hosted runner
-            # No need to install again
+            - name: Cache venv
+              uses: actions/cache@v3
+              id: cache-venv
+              with:
+                  path: venv
+                  key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements.txt') }}
+                  restore-keys: |
+                      ${{ runner.os }}-venv-
 
-            # Skip rebuild data in CI - tests use mocked data
-            # - name: Rebuild data
-            #   shell: pwsh
-            #   env:
-            #       GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-            #       PYTHONIOENCODING: utf-8
-            #   run: |
-            #       $env:PYTHONIOENCODING = "utf-8"
-            #       [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-            #       python scripts/smart_rebuild.py --create-version
+            - name: Create venv and install dependencies
+              if: steps.cache-venv.outputs.cache-hit != 'true'
+              shell: pwsh
+              run: |
+                  python -m venv venv
+                  .\venv\Scripts\Activate.ps1
+                  python -m pip install --upgrade pip
+                  pip install torch --index-url https://download.pytorch.org/whl/cpu
+                  pip install -r requirements.txt
+                  pip install pytest pytest-cov pytest-asyncio pytest-mock httpx requests
 
-            # Skip integration tests in CI - use unit tests with mocks only
-            # Integration tests run on CD (self-hosted runner)
-            # - name: Start MLflow server
-            # - name: Start MLOps server  
-            # - name: Wait for services
-            # - name: Run integration tests
-
-            - name: Run unit tests with coverage
-              working-directory: D:\HOANGVU\VPS\TwinSelf
-              shell: cmd
+            - name: Run unit tests
+              shell: pwsh
               env:
                   GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-                  MLFLOW_TRACKING_URI: http://localhost:5000
               run: |
-                  D:\ITApp\miniconda3\python.exe -m pytest tests/ -v --cov=twinself --cov-report=xml --cov-report=term-missing -m "not integration"
+                  .\venv\Scripts\Activate.ps1
+                  python -m pytest tests/ -v --cov=twinself --cov-report=xml --cov-report=term-missing -m "not integration"
 
             - name: Upload coverage
               if: always()
