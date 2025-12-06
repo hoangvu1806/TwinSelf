@@ -38,46 +38,13 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd D:\HOANGVU\VPS
 Start-Sleep -Seconds 15
 Write-Host "Done" -ForegroundColor Green
 
-# Start Portfolio Server
-Write-Host "[6/8] Starting Portfolio Server..." -ForegroundColor Yellow
-Write-Host "Opening Portfolio Server in separate window (check logs there)..." -ForegroundColor Yellow
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd D:\HOANGVU\VPS\TwinSelf; Write-Host 'Portfolio Server Starting...' -ForegroundColor Cyan; uvicorn portfolio_server:app --host 0.0.0.0 --port 8080 --workers 1"
-Start-Sleep -Seconds 30
-Write-Host "Done (check separate window for logs)" -ForegroundColor Green
+# Portfolio Server and Health check will be handled by CD workflow
+Write-Host "[6/8] Skipping Portfolio Server (handled by CD workflow)..." -ForegroundColor Yellow
+Write-Host "Done" -ForegroundColor Green
 
-# Health check
-Write-Host "[7/8] Health check..." -ForegroundColor Yellow
-Start-Sleep -Seconds 30
+Write-Host "[7/8] Skipping Health check (handled by CD workflow)..." -ForegroundColor Yellow
+Write-Host "Done" -ForegroundColor Green
 
-$maxRetries = 7
-$retryDelay = 10
-$success = $false
-
-for ($i = 1; $i -le $maxRetries; $i++) {
-    Write-Host "Attempt $i/$maxRetries..." -ForegroundColor Yellow
-    try {
-        $response = Invoke-WebRequest -Uri "http://localhost:8080/chatbot/api/health" -TimeoutSec 5 -ErrorAction Stop
-        if ($response.StatusCode -eq 200) {
-            Write-Host "Server is healthy!" -ForegroundColor Green
-            $success = $true
-            break
-        }
-    } catch {
-        Write-Host "Health check failed, retrying in ${retryDelay}s..." -ForegroundColor Yellow
-        if ($i -lt $maxRetries) {
-            Start-Sleep -Seconds $retryDelay
-        }
-    }
-}
-
-if ($success) {
-    Write-Host "========================================" -ForegroundColor Cyan
-    Write-Host "DEPLOYMENT SUCCESS" -ForegroundColor Green
-    Write-Host "========================================" -ForegroundColor Cyan
-    exit 0
-} else {
-    Write-Host "========================================" -ForegroundColor Red
-    Write-Host "DEPLOYMENT FAILED - Health check timeout" -ForegroundColor Red
-    Write-Host "========================================" -ForegroundColor Red
-    exit 1
-}
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "DEPLOYMENT PREPARATION COMPLETE" -ForegroundColor Green
+Write-Host "========================================" -ForegroundColor Cyan
