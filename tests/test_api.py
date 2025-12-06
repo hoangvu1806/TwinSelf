@@ -10,12 +10,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def client():
     """Test client with mocked chatbot and MLflow"""
-    with patch('mlops_server.DigitalTwinChatbot') as mock_chatbot_class, \
-         patch('mlops_server.MlflowClient') as mock_mlflow_client, \
-         patch('mlops_server.GeminiEvalModel') as mock_gemini:
+    # Mock heavy imports before importing mlops_server
+    with patch('twinself.DigitalTwinChatbot') as mock_chatbot_class, \
+         patch('mlflow.tracking.MlflowClient') as mock_mlflow_client, \
+         patch('mlflow.set_tracking_uri'), \
+         patch('mlflow.set_experiment'):
         
         # Mock chatbot instance
         chatbot_instance = Mock()
@@ -26,11 +28,13 @@ def client():
         # Mock MLflow client
         mock_mlflow_client.return_value = Mock()
         
-        # Mock Gemini model
-        mock_gemini.return_value = Mock()
-        
         # Import app after patching
         from mlops_server import app
+        
+        # Override global chatbot
+        import mlops_server
+        mlops_server.chatbot = chatbot_instance
+        mlops_server.mlflow_client = Mock()
         
         with TestClient(app) as test_client:
             yield test_client
