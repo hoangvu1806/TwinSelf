@@ -23,27 +23,37 @@ jobs:
             - name: Start Portfolio Server
               run: |
                   Set-Location D:\HOANGVU\VPS\TwinSelf
-                  Write-Host "Starting Portfolio Server..." -ForegroundColor Yellow
-                  $serverProcess = Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location D:\HOANGVU\VPS\TwinSelf; uvicorn portfolio_server:app --host 0.0.0.0 --port 8080 --workers 1" -PassThru
-                  Write-Host "Server started with PID: $($serverProcess.Id)" -ForegroundColor Cyan
+                  Write-Host "Starting Portfolio Server as detached process..." -ForegroundColor Yellow
+
+                  # Create startup script
+                  $startScript = @"
+                  Set-Location D:\HOANGVU\VPS\TwinSelf
+                  `$host.UI.RawUI.WindowTitle = 'Portfolio Server - Port 8080'
+                  Write-Host 'Portfolio Server Starting...' -ForegroundColor Cyan
+                  uvicorn portfolio_server:app --host 0.0.0.0 --port 8080 --workers 1
+                  "@
+                  $startScript | Out-File -FilePath ".\start_portfolio.ps1" -Encoding UTF8
+
+                  # Start detached process using WScript
+                  $vbsScript = @"
+                  Set WshShell = CreateObject("WScript.Shell")
+                  WshShell.Run "powershell.exe -ExecutionPolicy Bypass -NoExit -File D:\HOANGVU\VPS\TwinSelf\start_portfolio.ps1", 1, False
+                  "@
+                  $vbsScript | Out-File -FilePath ".\start_portfolio.vbs" -Encoding ASCII
+
+                  Start-Process -FilePath "cscript.exe" -ArgumentList "//nologo", ".\start_portfolio.vbs" -WindowStyle Hidden
+                  Write-Host "Server started (detached process)" -ForegroundColor Green
                   Start-Sleep -Seconds 30
-                  
-                  if (Get-Process -Id $serverProcess.Id -ErrorAction SilentlyContinue) {
-                      Write-Host "Server is running" -ForegroundColor Green
-                  } else {
-                      Write-Host "Server process died!" -ForegroundColor Red
-                      exit 1
-                  }
 
             - name: Health Check
               run: |
                   Write-Host "Running health checks..." -ForegroundColor Yellow
                   Start-Sleep -Seconds 30
-                  
+
                   $maxRetries = 7
                   $retryDelay = 10
                   $success = $false
-                  
+
                   for ($i = 1; $i -le $maxRetries; $i++) {
                       Write-Host "Attempt $i/$maxRetries..." -ForegroundColor Yellow
                       try {
@@ -60,7 +70,7 @@ jobs:
                           }
                       }
                   }
-                  
+
                   if (-not $success) {
                       Write-Host "Health check timeout!" -ForegroundColor Red
                       exit 1
