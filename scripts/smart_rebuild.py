@@ -117,7 +117,7 @@ def main():
             print("Procedural memory would be rebuilt")
         return
     
-    print("\n🔨 Starting rebuild process...")
+    print("\nStarting rebuild process...")
     
     # Rebuild semantic memory
     if semantic_changes['total_changes'] > 0 or args.force:
