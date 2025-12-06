@@ -26,7 +26,7 @@ Write-Host "Done" -ForegroundColor Green
 
 # Rebuild data
 Write-Host "[4/8] Rebuilding data..." -ForegroundColor Yellow
-D:\ITApp\miniconda3\python.exe scripts\smart_rebuild.py --create-version
+C:\Users\Duy\AppData\Local\Programs\Python\Python311\python.exe scripts\smart_rebuild.py --create-version
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Failed" -ForegroundColor Red
     exit 1
