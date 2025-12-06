@@ -36,11 +36,14 @@ jobs:
             # - name: Run integration tests
 
             - name: Run unit tests with coverage
+              working-directory: D:\HOANGVU\VPS\TwinSelf
               shell: cmd
               env:
                   GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
                   MLFLOW_TRACKING_URI: http://localhost:5000
-              run: python -m pytest tests/ -v --cov=twinself --cov-report=xml --cov-report=term-missing -m "not integration"
+              run: |
+                  cd D:\HOANGVU\VPS\TwinSelf
+                  python -m pytest tests/ -v --cov=twinself --cov-report=xml --cov-report=term-missing -m "not integration"
 
             - name: Upload coverage
               if: always()
