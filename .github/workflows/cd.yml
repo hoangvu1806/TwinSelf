@@ -19,3 +19,49 @@ jobs:
               run: |
                   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
                   D:\HOANGVU\VPS\TwinSelf\deploy.ps1
+
+            - name: Start Portfolio Server
+              run: |
+                  Set-Location D:\HOANGVU\VPS\TwinSelf
+                  Write-Host "Starting Portfolio Server..." -ForegroundColor Yellow
+                  $serverProcess = Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location D:\HOANGVU\VPS\TwinSelf; uvicorn portfolio_server:app --host 0.0.0.0 --port 8080 --workers 1" -PassThru
+                  Write-Host "Server started with PID: $($serverProcess.Id)" -ForegroundColor Cyan
+                  Start-Sleep -Seconds 30
+                  
+                  if (Get-Process -Id $serverProcess.Id -ErrorAction SilentlyContinue) {
+                      Write-Host "Server is running" -ForegroundColor Green
+                  } else {
+                      Write-Host "Server process died!" -ForegroundColor Red
+                      exit 1
+                  }
+
+            - name: Health Check
+              run: |
+                  Write-Host "Running health checks..." -ForegroundColor Yellow
+                  Start-Sleep -Seconds 30
+                  
+                  $maxRetries = 7
+                  $retryDelay = 10
+                  $success = $false
+                  
+                  for ($i = 1; $i -le $maxRetries; $i++) {
+                      Write-Host "Attempt $i/$maxRetries..." -ForegroundColor Yellow
+                      try {
+                          $response = Invoke-WebRequest -Uri "http://localhost:8080/chatbot/api/health" -TimeoutSec 5 -ErrorAction Stop
+                          if ($response.StatusCode -eq 200) {
+                              Write-Host "Server is healthy!" -ForegroundColor Green
+                              $success = $true
+                              break
+                          }
+                      } catch {
+                          Write-Host "Health check failed: $_" -ForegroundColor Yellow
+                          if ($i -lt $maxRetries) {
+                              Start-Sleep -Seconds $retryDelay
+                          }
+                      }
+                  }
+                  
+                  if (-not $success) {
+                      Write-Host "Health check timeout!" -ForegroundColor Red
+                      exit 1
+                  }
