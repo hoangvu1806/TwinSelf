@@ -1,18 +1,18 @@
 name: CD - Deploy to Production
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types:
+      - completed
     branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'tests/**'
   workflow_dispatch:
 
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: [self-hosted, HoangVu]
     timeout-minutes: 15
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
 
     steps:
       - name: Stop Portfolio Server (port 8080)
