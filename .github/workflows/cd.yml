@@ -15,57 +15,5 @@ jobs:
         if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
 
         steps:
-            - name: Stop Portfolio Server (port 8080)
-              run: |
-                  echo Stopping Portfolio Server on port 8080...
-                  for /f "tokens=5" %%a in ('netstat -aon ^| find ":8080" ^| find "LISTENING"') do taskkill /F /PID %%a 2>nul
-                  timeout /t 3 /nobreak >nul
-
-            - name: Stop MLflow Server (port 5000)
-              run: |
-                  echo Stopping MLflow Server on port 5000...
-                  for /f "tokens=5" %%a in ('netstat -aon ^| find ":5000" ^| find "LISTENING"') do taskkill /F /PID %%a 2>nul
-                  timeout /t 3 /nobreak >nul
-
-            - name: Pull latest code
-              run: |
-                  echo Pulling latest code...
-                  cd D:\HOANGVU\VPS\TwinSelf
-                  git fetch origin
-                  git reset --hard origin/main
-                  git clean -fd
-
-            - name: Rebuild data
-              run: |
-                  echo Rebuilding data...
-                  cd D:\HOANGVU\VPS\TwinSelf
-                  call venv\Scripts\activate.bat
-                  python scripts/smart_rebuild.py --create-version
-
-            - name: Start MLflow Server
-              run: |
-                  echo Starting MLflow Server...
-                  cd D:\HOANGVU\VPS\TwinSelf
-                  start /min cmd /k "call venv\Scripts\activate.bat && mlflow server --host 0.0.0.0 --port 5000"
-                  timeout /t 10 /nobreak >nul
-
-            - name: Start Portfolio Server
-              run: |
-                  echo Starting Portfolio Server...
-                  cd D:\HOANGVU\VPS\TwinSelf
-                  start /min cmd /k "call venv\Scripts\activate.bat && uvicorn portfolio_server:app --host 0.0.0.0 --port 8080 --workers 1"
-                  timeout /t 30 /nobreak >nul
-
-            - name: Health check
-              run: |
-                  echo Checking server health...
-                  timeout /t 10 /nobreak >nul
-                  curl http://localhost:8080/chatbot/api/health
-
-            - name: Deployment summary
-              if: always()
-              run: |
-                  echo =========================================
-                  echo Deployment completed
-                  echo Time: %date% %time%
-                  echo =========================================
+            - name: Deploy to production
+              run: D:\HOANGVU\VPS\TwinSelf\venv\Scripts\python.exe D:\HOANGVU\VPS\TwinSelf\scripts\deploy.py
