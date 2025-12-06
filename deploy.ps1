@@ -40,39 +40,10 @@ Write-Host "Done" -ForegroundColor Green
 
 # Start Portfolio Server
 Write-Host "[6/8] Starting Portfolio Server..." -ForegroundColor Yellow
-Write-Host "Checking for startup errors (showing output for 10 seconds)..." -ForegroundColor Yellow
-
-# Start server and capture initial output
-$job = Start-Job -ScriptBlock {
-    Set-Location D:\HOANGVU\VPS\TwinSelf
-    uvicorn portfolio_server:app --host 0.0.0.0 --port 8080 --workers 1 2>&1
-}
-
-# Wait and show output for 10 seconds
-Start-Sleep -Seconds 10
-$output = Receive-Job -Job $job -ErrorAction SilentlyContinue
-
-if ($output) {
-    Write-Host "Server output:" -ForegroundColor Cyan
-    Write-Host $output -ForegroundColor White
-}
-
-# Check if job is still running
-if ($job.State -eq "Running") {
-    Write-Host "Server started successfully (running in background)" -ForegroundColor Green
-    # Keep job running in background
-    Start-Sleep -Seconds 20
-    Write-Host "Done" -ForegroundColor Green
-} else {
-    Write-Host "Server failed to start!" -ForegroundColor Red
-    $errorOutput = Receive-Job -Job $job -ErrorAction SilentlyContinue
-    if ($errorOutput) {
-        Write-Host "Error details:" -ForegroundColor Red
-        Write-Host $errorOutput -ForegroundColor Red
-    }
-    Remove-Job -Job $job -Force
-    exit 1
-}
+Write-Host "Opening Portfolio Server in separate window (check logs there)..." -ForegroundColor Yellow
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd D:\HOANGVU\VPS\TwinSelf; Write-Host 'Portfolio Server Starting...' -ForegroundColor Cyan; uvicorn portfolio_server:app --host 0.0.0.0 --port 8080 --workers 1"
+Start-Sleep -Seconds 30
+Write-Host "Done (check separate window for logs)" -ForegroundColor Green
 
 # Health check
 Write-Host "[7/8] Health check..." -ForegroundColor Yellow
