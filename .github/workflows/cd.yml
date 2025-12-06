@@ -16,7 +16,6 @@ jobs:
 
         steps:
             - name: Deploy to production
-              shell: cmd
               run: |
-                  cd D:\HOANGVU\VPS\TwinSelf
-                  python scripts\deploy.py
+                  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+                  D:\HOANGVU\VPS\TwinSelf\deploy.ps1
