@@ -21,13 +21,30 @@ jobs:
                   D:\HOANGVU\VPS\TwinSelf\deploy.ps1
 
             - name: Start Portfolio Server
-              shell: cmd
               run: |
-                  cd /d D:\HOANGVU\VPS\TwinSelf
-                  echo Starting Portfolio Server...
-                  start "Portfolio Server" /MIN cmd /k "cd /d D:\HOANGVU\VPS\TwinSelf && uvicorn portfolio_server:app --host 0.0.0.0 --port 8080 --workers 1"
-                  timeout /t 30 /nobreak
-                  echo Server started in background
+                  Set-Location D:\HOANGVU\VPS\TwinSelf
+                  Write-Host "Starting Portfolio Server using Scheduled Task..." -ForegroundColor Yellow
+                  
+                  # Remove old task if exists
+                  Unregister-ScheduledTask -TaskName "PortfolioServer" -Confirm:$false -ErrorAction SilentlyContinue
+                  
+                  # Create action to run uvicorn
+                  $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -Command `"Set-Location D:\HOANGVU\VPS\TwinSelf; uvicorn portfolio_server:app --host 0.0.0.0 --port 8080 --workers 1`""
+                  
+                  # Create trigger (run once, immediately)
+                  $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date)
+                  
+                  # Create settings (allow task to run indefinitely)
+                  $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit 0
+                  
+                  # Register task
+                  Register-ScheduledTask -TaskName "PortfolioServer" -Action $action -Trigger $trigger -Settings $settings -User $env:USERNAME -RunLevel Highest -Force
+                  
+                  # Start task
+                  Start-ScheduledTask -TaskName "PortfolioServer"
+                  
+                  Write-Host "Server started as Scheduled Task" -ForegroundColor Green
+                  Start-Sleep -Seconds 30
 
             - name: Health Check
               run: |
