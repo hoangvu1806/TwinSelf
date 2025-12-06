@@ -36,17 +36,15 @@ jobs:
             # - name: Run integration tests
 
             - name: Run unit tests with coverage
-              shell: pwsh
               env:
                   GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
                   MLFLOW_TRACKING_URI: http://localhost:5000
               run: |
-                  .\venv\Scripts\activate
                   pytest tests/ -v --cov=twinself --cov-report=xml --cov-report=term-missing -m "not integration"
 
             - name: Upload coverage
-              uses: codecov/codecov-action@v3
               if: always()
+              uses: codecov/codecov-action@v3
               with:
                   file: ./coverage.xml
                   flags: unittests
