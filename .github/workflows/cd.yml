@@ -16,115 +16,56 @@ jobs:
 
         steps:
             - name: Stop Portfolio Server (port 8080)
-              shell: pwsh
               run: |
-                  Write-Host "Stopping Portfolio Server on port 8080..."
-                  $process = Get-NetTCPConnection -LocalPort 8080 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess
-                  if ($process) {
-                      Stop-Process -Id $process -Force
-                      Write-Host "✓ Portfolio Server stopped"
-                  } else {
-                      Write-Host "No process on port 8080"
-                  }
-                  Start-Sleep -Seconds 3
+                  echo Stopping Portfolio Server on port 8080...
+                  for /f "tokens=5" %%a in ('netstat -aon ^| find ":8080" ^| find "LISTENING"') do taskkill /F /PID %%a 2>nul
+                  timeout /t 3 /nobreak >nul
 
             - name: Stop MLflow Server (port 5000)
-              shell: pwsh
               run: |
-                  Write-Host "Stopping MLflow Server on port 5000..."
-                  $process = Get-NetTCPConnection -LocalPort 5000 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess
-                  if ($process) {
-                      Stop-Process -Id $process -Force
-                      Write-Host "✓ MLflow Server stopped"
-                  } else {
-                      Write-Host "No process on port 5000"
-                  }
-                  Start-Sleep -Seconds 3
+                  echo Stopping MLflow Server on port 5000...
+                  for /f "tokens=5" %%a in ('netstat -aon ^| find ":5000" ^| find "LISTENING"') do taskkill /F /PID %%a 2>nul
+                  timeout /t 3 /nobreak >nul
 
             - name: Pull latest code
-              shell: pwsh
               run: |
-                  Write-Host "Pulling latest code from main..."
+                  echo Pulling latest code...
+                  cd D:\HOANGVU\VPS\TwinSelf
                   git fetch origin
                   git reset --hard origin/main
                   git clean -fd
-                  Write-Host "✓ Code updated"
 
             - name: Rebuild data
-              shell: pwsh
-              env:
-                  PYTHONIOENCODING: utf-8
               run: |
-                  Write-Host "Rebuilding data..."
-                  .\venv\Scripts\activate
+                  echo Rebuilding data...
+                  cd D:\HOANGVU\VPS\TwinSelf
+                  call venv\Scripts\activate.bat
                   python scripts/smart_rebuild.py --create-version
-                  Write-Host "✓ Data rebuilt"
 
-            - name: Start MLflow Server (port 5000)
-              shell: pwsh
+            - name: Start MLflow Server
               run: |
-                  Write-Host "Starting MLflow Server on port 5000..."
-                  Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd D:\HOANGVU\VPS\TwinSelf; .\venv\Scripts\activate; mlflow server --host 0.0.0.0 --port 5000" -WindowStyle Minimized
-                  Start-Sleep -Seconds 10
-                  Write-Host "✓ MLflow Server started"
+                  echo Starting MLflow Server...
+                  cd D:\HOANGVU\VPS\TwinSelf
+                  start /min cmd /k "call venv\Scripts\activate.bat && mlflow server --host 0.0.0.0 --port 5000"
+                  timeout /t 10 /nobreak >nul
 
-            - name: Wait for MLflow to be ready
-              shell: pwsh
+            - name: Start Portfolio Server
               run: |
-                  Write-Host "Waiting for MLflow to be ready..."
-                  $maxRetries = 15
-                  for ($i = 0; $i -lt $maxRetries; $i++) {
-                      try {
-                          $response = Invoke-WebRequest -Uri "http://localhost:5000/health" -TimeoutSec 2 -ErrorAction Stop
-                          if ($response.StatusCode -eq 200) {
-                              Write-Host "✓ MLflow is ready!"
-                              break
-                          }
-                      } catch {
-                          Write-Host "Waiting... ($i/$maxRetries)"
-                          Start-Sleep -Seconds 2
-                      }
-                  }
+                  echo Starting Portfolio Server...
+                  cd D:\HOANGVU\VPS\TwinSelf
+                  start /min cmd /k "call venv\Scripts\activate.bat && uvicorn portfolio_server:app --host 0.0.0.0 --port 8080 --workers 1"
+                  timeout /t 30 /nobreak >nul
 
-            - name: Start Portfolio Server (port 8080)
-              shell: pwsh
+            - name: Health check
               run: |
-                  Write-Host "Starting Portfolio Server on port 8080..."
-                  Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd D:\HOANGVU\VPS\TwinSelf; .\venv\Scripts\activate; uvicorn portfolio_server:app --host 0.0.0.0 --port 8080 --workers 1" -WindowStyle Minimized
-                  Start-Sleep -Seconds 30
-                  Write-Host "✓ Portfolio Server started"
-
-            - name: Health check Portfolio Server
-              shell: pwsh
-              run: |
-                  Write-Host "Checking Portfolio Server health..."
-                  $maxRetries = 30
-                  for ($i = 0; $i -lt $maxRetries; $i++) {
-                      try {
-                          $response = Invoke-WebRequest -Uri "http://localhost:8080/chatbot/api/health" -TimeoutSec 2 -ErrorAction Stop
-                          if ($response.StatusCode -eq 200) {
-                              $data = $response.Content | ConvertFrom-Json
-                              Write-Host "✓ Portfolio Server is healthy!"
-                              Write-Host "  Bot: $($data.bot_name)"
-                              Write-Host "  MLflow: $($data.mlflow_connected)"
-                              exit 0
-                          }
-                      } catch {
-                          Write-Host "Waiting for server... ($i/$maxRetries)"
-                          Start-Sleep -Seconds 2
-                      }
-                  }
-                  Write-Host "✗ Health check failed"
-                  exit 1
+                  echo Checking server health...
+                  timeout /t 10 /nobreak >nul
+                  curl http://localhost:8080/chatbot/api/health
 
             - name: Deployment summary
               if: always()
-              shell: pwsh
               run: |
-                  $status = if ($?) { "✓ SUCCESS" } else { "✗ FAILED" }
-                  Write-Host "`n========================================="
-                  Write-Host "Deployment $status"
-                  Write-Host "Time: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
-                  Write-Host "Branch: main"
-                  Write-Host "Commit: $env:GITHUB_SHA"
-                  Write-Host "========================================="
+                  echo =========================================
+                  echo Deployment completed
+                  echo Time: %date% %time%
+                  echo =========================================
