@@ -30,7 +30,7 @@ jobs:
               uses: actions/cache@v3
               with:
                   path: ${{ steps.pip-cache.outputs.dir }}
-                  key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+                  key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-ci.txt') }}
                   restore-keys: |
                       ${{ runner.os }}-pip-
 
@@ -50,25 +50,11 @@ jobs:
                   restore-keys: |
                       ${{ runner.os }}-qdrant-
 
-            - name: Cache torch
-              uses: actions/cache@v3
-              with:
-                  path: ~\AppData\Local\torch
-                  key: ${{ runner.os }}-torch-2.0.0
-                  restore-keys: |
-                      ${{ runner.os }}-torch-
-
-            - name: Install torch (heavy dependency)
+            - name: Install dependencies
               shell: pwsh
               run: |
                   python -m pip install --upgrade pip setuptools wheel
-                  pip install torch --index-url https://download.pytorch.org/whl/cpu
-
-            - name: Install other dependencies
-              shell: pwsh
-              run: |
-                  pip install --prefer-binary -r requirements.txt
-                  pip install --prefer-binary pytest pytest-cov pytest-asyncio pytest-mock httpx requests
+                  pip install --prefer-binary -r requirements-ci.txt
 
             - name: Rebuild data
               shell: pwsh

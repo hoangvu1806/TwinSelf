@@ -1,0 +1,34 @@
+# Minimal requirements for CI testing
+# Core
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+
+# LLM - minimal
+langchain-core>=0.1.0
+langchain-google-genai>=1.0.0
+google-generativeai>=0.3.0
+
+# Vector Database - minimal
+qdrant-client>=1.7.0
+langchain-qdrant>=0.1.0
+
+# Embeddings - minimal (no torch for CI)
+sentence-transformers>=2.2.0
+
+# MLOps - minimal
+mlflow>=2.9.0
+
+# Utilities
+tiktoken>=0.5.0
+requests>=2.31.0
+nest-asyncio>=1.5.0
+tenacity>=8.2.0
+
+# Testing
+pytest>=7.4.3
+pytest-cov>=4.1.0
+pytest-asyncio>=0.21.1
+pytest-mock>=3.12.0
+httpx>=0.25.2
