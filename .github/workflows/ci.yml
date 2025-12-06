@@ -19,13 +19,36 @@ jobs:
               with:
                   python-version: "3.11"
 
+            - name: Get pip cache dir
+              id: pip-cache
+              shell: pwsh
+              run: |
+                  $cacheDir = python -m pip cache dir
+                  echo "dir=$cacheDir" >> $env:GITHUB_OUTPUT
+
             - name: Cache pip packages
               uses: actions/cache@v3
               with:
-                  path: ~\AppData\Local\pip\Cache
+                  path: ${{ steps.pip-cache.outputs.dir }}
                   key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
                   restore-keys: |
                       ${{ runner.os }}-pip-
+
+            - name: Cache HuggingFace models
+              uses: actions/cache@v3
+              with:
+                  path: ~\.cache\huggingface
+                  key: ${{ runner.os }}-huggingface-models
+                  restore-keys: |
+                      ${{ runner.os }}-huggingface-
+
+            - name: Cache Qdrant data
+              uses: actions/cache@v3
+              with:
+                  path: data\qdrant_storage
+                  key: ${{ runner.os }}-qdrant-${{ hashFiles('semantic_data/**', 'episodic_data/**', 'procedural_data/**') }}
+                  restore-keys: |
+                      ${{ runner.os }}-qdrant-
 
             - name: Install dependencies
               shell: pwsh
