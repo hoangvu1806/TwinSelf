@@ -21,29 +21,13 @@ jobs:
                   D:\HOANGVU\VPS\TwinSelf\deploy.ps1
 
             - name: Start Portfolio Server
+              shell: cmd
               run: |
-                  Set-Location D:\HOANGVU\VPS\TwinSelf
-                  Write-Host "Starting Portfolio Server as detached process..." -ForegroundColor Yellow
-
-                  # Create startup script
-                  $startScript = @"
-                  Set-Location D:\HOANGVU\VPS\TwinSelf
-                  `$host.UI.RawUI.WindowTitle = 'Portfolio Server - Port 8080'
-                  Write-Host 'Portfolio Server Starting...' -ForegroundColor Cyan
-                  uvicorn portfolio_server:app --host 0.0.0.0 --port 8080 --workers 1
-                  "@
-                  $startScript | Out-File -FilePath ".\start_portfolio.ps1" -Encoding UTF8
-
-                  # Start detached process using WScript
-                  $vbsScript = @"
-                  Set WshShell = CreateObject("WScript.Shell")
-                  WshShell.Run "powershell.exe -ExecutionPolicy Bypass -NoExit -File D:\HOANGVU\VPS\TwinSelf\start_portfolio.ps1", 1, False
-                  "@
-                  $vbsScript | Out-File -FilePath ".\start_portfolio.vbs" -Encoding ASCII
-
-                  Start-Process -FilePath "cscript.exe" -ArgumentList "//nologo", ".\start_portfolio.vbs" -WindowStyle Hidden
-                  Write-Host "Server started (detached process)" -ForegroundColor Green
-                  Start-Sleep -Seconds 30
+                  cd /d D:\HOANGVU\VPS\TwinSelf
+                  echo Starting Portfolio Server...
+                  start "Portfolio Server" /MIN cmd /k "cd /d D:\HOANGVU\VPS\TwinSelf && uvicorn portfolio_server:app --host 0.0.0.0 --port 8080 --workers 1"
+                  timeout /t 30 /nobreak
+                  echo Server started in background
 
             - name: Health Check
               run: |
