@@ -37,18 +37,16 @@ def rebuild_data():
     """Rebuild data"""
     print("Rebuilding data...")
     os.chdir(r"D:\HOANGVU\VPS\TwinSelf")
-    python_exe = r"D:\HOANGVU\VPS\TwinSelf\venv\Scripts\python.exe"
-    subprocess.run([python_exe, "scripts/smart_rebuild.py", "--create-version"], check=True)
+    subprocess.run(["python", "scripts/smart_rebuild.py", "--create-version"], check=True)
     print("✓ Data rebuilt")
 
 def start_mlflow():
     """Start MLflow server"""
     print("Starting MLflow server...")
     os.chdir(r"D:\HOANGVU\VPS\TwinSelf")
-    mlflow_exe = r"D:\HOANGVU\VPS\TwinSelf\venv\Scripts\mlflow.exe"
     
     subprocess.Popen(
-        [mlflow_exe, "server", "--host", "0.0.0.0", "--port", "5000"],
+        ["mlflow", "server", "--host", "0.0.0.0", "--port", "5000"],
         creationflags=subprocess.CREATE_NEW_CONSOLE | subprocess.CREATE_NO_WINDOW
     )
     time.sleep(10)
@@ -58,10 +56,9 @@ def start_portfolio():
     """Start portfolio server"""
     print("Starting portfolio server...")
     os.chdir(r"D:\HOANGVU\VPS\TwinSelf")
-    uvicorn_exe = r"D:\HOANGVU\VPS\TwinSelf\venv\Scripts\uvicorn.exe"
     
     subprocess.Popen(
-        [uvicorn_exe, "portfolio_server:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "1"],
+        ["uvicorn", "portfolio_server:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "1"],
         creationflags=subprocess.CREATE_NEW_CONSOLE | subprocess.CREATE_NO_WINDOW
     )
     time.sleep(30)

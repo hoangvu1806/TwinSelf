@@ -17,4 +17,6 @@ jobs:
         steps:
             - name: Deploy to production
               shell: cmd
-              run: D:\HOANGVU\VPS\TwinSelf\venv\Scripts\python.exe D:\HOANGVU\VPS\TwinSelf\scripts\deploy.py
+              run: |
+                  cd D:\HOANGVU\VPS\TwinSelf
+                  python scripts\deploy.py
