@@ -22,28 +22,13 @@ jobs:
 
             - name: Start Portfolio Server
               run: |
-                  Write-Host "Starting Portfolio Server as detached process..." -ForegroundColor Yellow
+                  Write-Host "Starting Portfolio Server..." -ForegroundColor Yellow
 
-                  # Use wmic to create completely detached process
-                  $result = wmic process call create "cmd.exe /c start /min D:\HOANGVU\VPS\TwinSelf\start_portfolio_server.bat"
+                  # Use wmic to create detached process (survives workflow completion)
+                  wmic process call create "cmd.exe /c D:\HOANGVU\VPS\TwinSelf\start_portfolio_server.bat" | Out-Null
 
-                  if ($result -match "ProcessId = (\d+)") {
-                      $pid = $matches[1]
-                      Write-Host "Server started with PID: $pid" -ForegroundColor Cyan
-                  } else {
-                      Write-Host "Server started (detached)" -ForegroundColor Cyan
-                  }
-
+                  Write-Host "Server started (detached process)" -ForegroundColor Cyan
                   Start-Sleep -Seconds 30
-
-                  # Verify server process is running
-                  $serverProcess = Get-Process | Where-Object { $_.ProcessName -eq "python" -and $_.CommandLine -like "*uvicorn*portfolio_server*" } -ErrorAction SilentlyContinue
-                  if ($serverProcess) {
-                      Write-Host "Server is running (PID: $($serverProcess.Id))" -ForegroundColor Green
-                  } else {
-                      Write-Host "Warning: Could not verify server process" -ForegroundColor Yellow
-                  }
-
                   Write-Host "Done" -ForegroundColor Green
 
             - name: Health Check
