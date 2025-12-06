@@ -8,7 +8,7 @@ on:
 
 jobs:
     integration-test:
-        runs-on: HoangVu
+        runs-on: self-hosted
         timeout-minutes: 10
 
         steps:
