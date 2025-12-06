@@ -59,57 +59,23 @@ jobs:
                   pip install --prefer-binary -r requirements.txt
                   pip install pytest pytest-cov pytest-asyncio pytest-mock httpx requests
 
-            - name: Rebuild data
-              shell: pwsh
-              env:
-                  GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-                  PYTHONIOENCODING: utf-8
-              run: |
-                  $env:PYTHONIOENCODING = "utf-8"
-                  [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-                  python scripts/smart_rebuild.py --create-version
+            # Skip rebuild data in CI - tests use mocked data
+            # - name: Rebuild data
+            #   shell: pwsh
+            #   env:
+            #       GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+            #       PYTHONIOENCODING: utf-8
+            #   run: |
+            #       $env:PYTHONIOENCODING = "utf-8"
+            #       [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            #       python scripts/smart_rebuild.py --create-version
 
-            - name: Start MLflow server
-              shell: pwsh
-              run: |
-                  Start-Process powershell -ArgumentList "-Command", "mlflow server --host 127.0.0.1 --port 5000" -WindowStyle Hidden
-                  Start-Sleep -Seconds 10
-
-            - name: Start MLOps server
-              shell: pwsh
-              env:
-                  GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-                  MLFLOW_TRACKING_URI: http://localhost:5000
-                  PYTHONIOENCODING: utf-8
-              run: |
-                  $env:PYTHONIOENCODING = "utf-8"
-                  Start-Process powershell -ArgumentList "-Command", "`$env:PYTHONIOENCODING='utf-8'; python mlops_server.py" -WindowStyle Hidden
-                  Start-Sleep -Seconds 30
-
-            - name: Wait for services to be ready
-              shell: pwsh
-              run: |
-                  $maxRetries = 30
-                  for ($i = 0; $i -lt $maxRetries; $i++) {
-                      try {
-                          $response = Invoke-WebRequest -Uri "http://localhost:8001/health" -TimeoutSec 2
-                          if ($response.StatusCode -eq 200) {
-                              Write-Host "Services ready!"
-                              break
-                          }
-                      } catch {
-                          Write-Host "Waiting for services... ($i/$maxRetries)"
-                          Start-Sleep -Seconds 2
-                      }
-                  }
-
-            - name: Run integration tests
-              shell: pwsh
-              env:
-                  GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-                  MLFLOW_TRACKING_URI: http://localhost:5000
-              run: |
-                  pytest tests/test_integration.py -v -m integration --tb=short
+            # Skip integration tests in CI - use unit tests with mocks only
+            # Integration tests run on CD (self-hosted runner)
+            # - name: Start MLflow server
+            # - name: Start MLOps server  
+            # - name: Wait for services
+            # - name: Run integration tests
 
             - name: Run unit tests with coverage
               shell: pwsh
