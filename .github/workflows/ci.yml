@@ -47,8 +47,7 @@ jobs:
                   GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
                   MLFLOW_TRACKING_URI: http://localhost:5000
               run: |
-                  cd D:\HOANGVU\VPS\TwinSelf
-                  python -m pytest tests/ -v --cov=twinself --cov-report=xml --cov-report=term-missing -m "not integration"
+                  D:\ITApp\miniconda3\python.exe -m pytest tests/ -v --cov=twinself --cov-report=xml --cov-report=term-missing -m "not integration"
 
             - name: Upload coverage
               if: always()
