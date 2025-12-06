@@ -21,35 +21,13 @@ jobs:
                   D:\HOANGVU\VPS\TwinSelf\deploy.ps1
 
             - name: Start Portfolio Server
+              shell: pwsh
               run: |
-                  Set-Location D:\HOANGVU\VPS\TwinSelf
                   Write-Host "Starting Portfolio Server..." -ForegroundColor Yellow
-                  
-                  # Use Start-Job to run in background (survives workflow completion)
-                  $job = Start-Job -ScriptBlock {
-                      Set-Location D:\HOANGVU\VPS\TwinSelf
-                      & uvicorn portfolio_server:app --host 0.0.0.0 --port 8080 --workers 1
-                  }
-                  
-                  Write-Host "Server job started (ID: $($job.Id))" -ForegroundColor Cyan
-                  
-                  # Save job ID to file for later reference
-                  $job.Id | Out-File -FilePath ".\portfolio_server.job" -Encoding UTF8
-                  
-                  # Wait for server to initialize
+                  $process = Start-Process -FilePath "D:\HOANGVU\VPS\TwinSelf\start_portfolio_server.bat" -PassThru -WindowStyle Normal
+                  Write-Host "Server process started (PID: $($process.Id))" -ForegroundColor Cyan
                   Start-Sleep -Seconds 30
-                  
-                  # Check job is still running
-                  $jobState = (Get-Job -Id $job.Id).State
-                  Write-Host "Job state: $jobState" -ForegroundColor Cyan
-                  
-                  if ($jobState -eq "Running") {
-                      Write-Host "Server is running in background" -ForegroundColor Green
-                  } else {
-                      Write-Host "Server job failed!" -ForegroundColor Red
-                      Receive-Job -Id $job.Id
-                      exit 1
-                  }
+                  Write-Host "Done" -ForegroundColor Green
 
             - name: Health Check
               run: |
