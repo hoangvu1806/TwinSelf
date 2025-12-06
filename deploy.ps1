@@ -18,6 +18,7 @@ Write-Host "Done" -ForegroundColor Green
 # Pull latest code
 Write-Host "[3/8] Pulling latest code..." -ForegroundColor Yellow
 Set-Location D:\HOANGVU\VPS\TwinSelf
+git config --global --add safe.directory D:/HOANGVU/VPS/TwinSelf
 git fetch origin
 git reset --hard origin/main
 git clean -fd
@@ -25,7 +26,7 @@ Write-Host "Done" -ForegroundColor Green
 
 # Rebuild data
 Write-Host "[4/8] Rebuilding data..." -ForegroundColor Yellow
-python scripts\smart_rebuild.py --create-version
+D:\ITApp\miniconda3\python.exe scripts\smart_rebuild.py --create-version
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Failed" -ForegroundColor Red
     exit 1
